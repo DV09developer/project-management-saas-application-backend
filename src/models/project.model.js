@@ -10,25 +10,39 @@ const ProjectSchema = new Schema(
         projectestimateddeadline: {
             type: Date,
         },
-        estimatedTime: {
-            value: {
-                type: Number,
-                required: true,
-            },
-            unit: {
-                type: String,
-                enum: ["minutes", "hours", "days", "weeks", "months"],
-                required: true,
-            },
-        },
+        // estimatedTime: {
+        //     value: {
+        //         type: Number,
+        //         required: true,
+        //     },
+        //     unit: {
+        //         type: String,
+        //         enum: ["minutes", "hours", "days", "weeks", "months"],
+        //         required: true,
+        //     },
+        // },
         createdByUser: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
+            ref: "User",
+            index: true
         },
-
-        // projectMember: {
-
-        // }
+        projectMember: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+                required: true
+            },
+            {
+                type: String,
+                enum: ["Owner", "Manager", "Employee"]
+            }
+        ],
+        taskStatus: [
+            {
+                type: String,
+                required: true
+            }
+        ]
 
 
 
@@ -40,6 +54,13 @@ const ProjectSchema = new Schema(
     },
     { timestamps: true }
 );
+
+// Indexes
+ProjectSchema.index({ "projectMembers.user": 1 });
+ProjectSchema.index({ createdAt: -1 });
+ProjectSchema.index({ projectname: "text" });
+ProjectSchema.index({ taskStatus: 1 });
+
 
 const Project = mongoose.model("Project", ProjectSchema);
 

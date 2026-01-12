@@ -34,7 +34,13 @@ const userSchema = new Schema({
     },
     refreshToken: {
         type: String,
-    }
+    },
+    projects: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Project"
+        }
+    ]
 }, {timestamps : true})
 
 export const User = mongoose.model("User" , userSchema);

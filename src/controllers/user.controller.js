@@ -42,4 +42,63 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 })
 
-export {registerUser};
+const loginUser = asyncHandler(async (req, res) => {
+    const { email, username, password } = req.body;
+
+    if (!(email?.trim() || username?.trim())) {
+        throw new apiError(400 , "Email or Username is required");
+    }
+    if (password?.trim() === "") {
+        throw new apiError(400 , "Password is required");
+    }
+
+    const user = await User.findOne({
+        $or: [{ email }, { username }]
+    })
+
+    if (!user) {
+        throw new apiError(404 , "User not found");
+    }
+
+    const isPasswordMatch = await user.isPasswordCorrect(password);
+
+    if (!isPasswordMatch) {
+        throw new apiError(401 , "Invalid password");
+    }
+
+    // await generateAccessTokenAndRefreshToken(user._id).then(({ accessToken, refreshToken }) => {
+    //     return res.status(200).json(
+    //         new apiResponse(200 , {
+    //             accessToken,
+    //             refreshToken
+    //         } , "User logged in successfully")
+    //     )
+    // })
+
+    const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(user._id);
+
+    const loggedInUser = await User.findById(user._id).select(
+        "-password -__v -createdAt -updatedAt -refreshToken"
+    );
+
+    const options = {
+        httponly : true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+        new apiResponse(
+            200,
+            {
+                user: loggedInUser, accessToken, refreshToken
+            },
+            "User logged in successfully"
+        )
+    )
+})
+
+export {registerUser , loginUser};

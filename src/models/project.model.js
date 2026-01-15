@@ -24,27 +24,39 @@ const ProjectSchema = new Schema(
         createdByUser: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            index: true
+            index: true,
         },
         projectMember: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "User",
-                required: true
+                required: true,
             },
             {
                 type: String,
-                enum: ["Owner", "Manager", "Employee"]
-            }
+                enum: ["Owner", "Manager", "Employee"],
+            },
         ],
-        taskStatus: [
+        taskStatuses: [
             {
-                type: String,
-                required: true
-            }
-        ]
-
-
+                key: {
+                    type: String, // "planned", "development", "review", "completed"
+                    required: true,
+                },
+                label: {
+                    type: String, // "Planned", "In Development"
+                    required: true,
+                },
+                order: {
+                    type: Number, // for workflow order
+                    required: true,
+                },
+                isFinal: {
+                    type: Boolean,
+                    default: false,
+                },
+            },
+        ],
 
         // projectestimatedtimeline: {
         //     type: String,        // for time only
@@ -60,7 +72,6 @@ ProjectSchema.index({ "projectMembers.user": 1 });
 ProjectSchema.index({ createdAt: -1 });
 ProjectSchema.index({ projectname: "text" });
 ProjectSchema.index({ taskStatus: 1 });
-
 
 const Project = mongoose.model("Project", ProjectSchema);
 

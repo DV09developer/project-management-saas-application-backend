@@ -32,4 +32,6 @@ const addTaskStatus = asyncHandler(async (req, res) => {
     // const {}
 })
 
+const updateProject = asyncHandler(async (req, res) => {})
+
 export { createProject }

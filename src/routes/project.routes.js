@@ -1,37 +1,11 @@
-import { Project } from "../models/project.model.js"
-import { apiError } from "../utils/apiError.js";
-import { asyncHandler } from "../utils/asyncHandler.js"
+import { Router } from "express";
+import createProject from "../controllers/project.controller.js";
+import { verifyAccessToken } from "../middlewares/auth.middleware.js";
 
-const createProject = asyncHandler(async (req, res) => {
-    const { projectname } = req.body;
+const router = Router;
 
-    if (!projectname) {
-        throw new apiError(444 , "Project name is required")
-    }
+router.route("/create-project").post(verifyAccessToken, createProject);
 
-    const ownerId = req.user.id;
-    if (!ownerId) {
-        throw new apiError(401 , "Unauthorized");
-    }
+router.route("/update-project").post(verifyAccessToken, updateProject);
 
-    const addProject = await Project.create({
-        projectname,
-        createdByUser : ownerId
-    })
-
-    if (!addProject) {
-        throw apiError(500 , "Project creation failed")
-    }
-
-    return res.status(201).json(
-        new apiResponse(201 , video , "Project created successfully")
-    );
-})
-
-const addTaskStatus = asyncHandler(async (req, res) => {
-    // const {}
-})
-
-const updateProject = asyncHandler(async (req, res) => {})
-
-export { createProject }
+export { router };

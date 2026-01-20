@@ -6,6 +6,8 @@ const router = Router;
 
 router.route("/create-project").post(verifyAccessToken, createProject);
 
-router.route("/update-project").post(verifyAccessToken, updateProject);
+router.route("/:id/update-project").post(verifyAccessToken, updateProject);
+
+router.route("/:id/add-task-status").post(verifyAccessToken, addTaskStatus);
 
 export { router };

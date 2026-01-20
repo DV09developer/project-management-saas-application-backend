@@ -29,9 +29,54 @@ const createProject = asyncHandler(async (req, res) => {
 })
 
 const addTaskStatus = asyncHandler(async (req, res) => {
-    // const {}
+
+    const {key , label , order , isFinal} = req.body;
+    const project_id = req.params.id; 
+
+    if (!key || !label || order === undefined) {
+        throw new apiError(400, "Key, label and order are required");
+    }
+
+    // Check if project exists
+    const project = await Project.findById(project_id);
+
+    if (!project) {
+        throw new apiError(404 , "Project is not exist please give proper the project id")
+    }
+
+    // Prevent duplicate status key
+    const isDuplicate = project.taskStatuses.some(
+        (status) => status.key === key
+    );
+
+    if (isDuplicate) {
+        throw new apiError(409, "Task status key already exists");
+    }
+
+    if (isFinal) {
+        project.taskStatuses.forEach(status => {
+            status.isFinal = false;
+        });
+    }
+
+     // Add new task status
+    project.taskStatuses.push({
+        key,
+        label,
+        order,
+        isFinal: isFinal ?? false,
+    });
+
+    // Sort by order
+    project.taskStatuses.sort((a, b) => a.order - b.order);
+
+    await project.save();
+
+    return res.status(201).json(
+        new apiResponse(201 , updatedProject , "Task status is added")
+    )
 })
 
 const updateProject = asyncHandler(async (req, res) => {})
 
-export { createProject , updateProject }
+export { createProject , updateProject , addTaskStatus }
